@@ -1,7 +1,7 @@
 import pygame
 import sys
 import os 
-
+import random
 
 
 pygame.init()
@@ -20,7 +20,7 @@ pygame.display.set_caption("Pendu")
 
 font = pygame.font.Font(font_path, size)
 
-# Option button
+# Option buttons
 option_rect = pygame.Rect(300,250,150,100)
 play_rect = pygame.Rect(300,125,150,100)
 quit_rect = pygame.Rect(300,380,150,100)
@@ -28,7 +28,26 @@ return_rect = pygame.Rect(300,470,150,100)
 add_word_rect = pygame.Rect(300,300,200,100)
 difficultie_rect = pygame.Rect(300,150,200,100)
 
+#word list 
+words = ["concern", "window", "settlement", "sunshine", "retain", "constellation", "finance",
+        "safari","philosophy","follow","cotton","rabbit","energy","identity","season"]
 
+with open("words.txt","w") as file:
+    for word in words:
+        file.write(word +"\n")
+
+def words_random(file):
+    with open (file,"r") as f:
+        words = f.read().splitlines()
+    return (random.choice(words))
+    
+def convert_hangman(word, found_letters):
+    return " ".join([letter if letter in found_letters else "_" for letter in word])
+ 
+
+
+
+#fonction principal
 def draw_main_page():
     screen.fill(grey)
     pygame.draw.rect(screen, black, option_rect, 5)
@@ -41,6 +60,7 @@ def draw_main_page():
     screen.blit(play_text, (play_rect.x+ 20, play_rect.y + 40))
     screen.blit(quit_text, (quit_rect.x + 10, quit_rect.y + 30))
 
+#fonction second
 def draw_option_page():
     screen.fill(grey)
     pygame.draw.rect(screen, black, add_word_rect, 5)
@@ -53,14 +73,23 @@ def draw_option_page():
     screen.blit(dificultie_text, (difficultie_rect.x + 10, difficultie_rect.y + 30))
     screen.blit(return_text, (return_rect.x + 20, return_rect.y + 30,))
 
-
-def quit_page():
+def draw_hangman_page(word_hangman, try_remaining):
     screen.fill(grey)
+    hangman_text = font.render(word_hangman, True, black)
+    screen.blit(hangman_text,(300,200))
+    try_text = font.render(f"Try remaining: {try_remaining}",True, black)
+    screen.blit(try_text,(300,250))
+
+
+
 
 # Main loop
 main_page = True
 in_game = False
-
+found_letters = set()
+mot = ""
+try_remaining = 6
+victory = False
 
 while True:
     for event in pygame.event.get():
@@ -68,20 +97,49 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
+            if main_page:
+                if option_rect.collidepoint(event.pos):
+                    main_page = False
+                elif play_rect.collidepoint(event.pos):
+                    main_page = False
+                    in_game = True
+                    word = words_random("words.txt")
+                    found_letters = set()
+                    try_remaining = 6
+                elif quit_rect.collidepoint(event.pos):
+                    pygame.quit()
+                    sys.exit()
+            else:
+                if return_rect.collidepoint(event.pos):
+                    main_page = True
+                    in_game = False
+
             if main_page and option_rect.collidepoint(event.pos):
                 main_page = False
             if main_page and play_rect.collidepoint(event.pos):
                 main_page = False
-            if quit_rect.collidepoint(event.pos):
-                pygame.quit()
-                sys.exit()
             else:
                 if return_rect.collidepoint(event.pos):
                     main_page = True
+        if in_game and event.type == pygame.KEYDOWN:
+            letter = event.unicode.lower()
+            if letter in found_letters:
+                continue
+            found_letters.add(letter)
+            if letter not in word:
+                try_remaining -=1
             
 
     if main_page:
         draw_main_page()
+    elif in_game:
+        hangman_word = convert_hangman(word, found_letters)
+        draw_hangman_page(hangman_word, try_remaining)
+        if "_" not in hangman_word.replace("",""):
+            print("You won!")
+
+        elif try_remaining == 0:
+            print("You lose! the word was: ", word)
     else:
         draw_option_page()
     

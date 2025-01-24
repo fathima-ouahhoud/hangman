@@ -5,7 +5,6 @@ with open("words.txt", "r") as file:
     word_list = [word.strip() for word in file.readlines()]
 
 solution = choice(word_list)
-
 attempts = 7
 display = ""
 found_letters = ""
@@ -49,6 +48,8 @@ while attempts > 0:
 
     if "_" not in display:
         print(">>> You win! <<<")
+    else:
+        print(">>> Game Over! <<<")
         break
 
 print("\n * End of the game * ")

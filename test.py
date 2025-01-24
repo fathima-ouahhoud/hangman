@@ -28,9 +28,20 @@ return_rect = pygame.Rect(300,470,150,100)
 add_word_rect = pygame.Rect(300,300,200,100)
 difficultie_rect = pygame.Rect(300,150,200,100)
 
+
 #word list 
-words = ["concern", "window", "settlement", "sunshine", "retain", "constellation", "finance",
-        "safari","philosophy","follow","cotton","rabbit","energy","identity","season"]
+words = open("words.txt", "r")
+
+f = words.readlines()
+list_word = []
+for line in f:
+    if (line[-1] == '\n'):
+        list_word.append(line[:-1])
+    else:
+        list_word.append(line)
+print(list_word)
+
+
 
 with open("words.txt","w") as file:
     for word in words:
@@ -39,7 +50,7 @@ with open("words.txt","w") as file:
 def words_random(file):
     with open (file,"r") as f:
         words = f.read().splitlines()
-    return (random.choice(words))
+    return random.choice(words)
     
 def convert_hangman(word, found_letters):
     return " ".join([letter if letter in found_letters else "_" for letter in word])
@@ -76,16 +87,17 @@ def draw_option_page():
 def draw_hangman_page(word_hangman, try_remaining):
     screen.fill(grey)
     hangman_text = font.render(word_hangman, True, black)
-    screen.blit(hangman_text,(170,120))
-    try_text = font.render(f"Try remaining: {try_remaining}",True, black)
-    screen.blit(try_text,(150,70))
+    screen.blit(hangman_text,(110,130))
+    try_text = sans_font.render(f"Try remaining : {try_remaining}",True, black)
+    screen.blit(try_text,(100,70))
 
 
-
+# victory/lose render
 sans_font = pygame.font.SysFont("comicsansms", 28)
 image = pygame.image.load('images/pendu_1.png').convert()
-win_condition = sans_font.render("You Win", False, black)
-lose_condition = sans_font.render("You Lose", False, black)
+win_condition = sans_font.render("You Win", True, black)
+lose_condition = sans_font.render(f"You Lose, the word was :", True, black)
+false_letters = sans_font.render("Wrong letters", True, black)
 
 
 
@@ -142,12 +154,13 @@ while True:
     elif in_game:
         hangman_word = convert_hangman(word, found_letters)
         draw_hangman_page(hangman_word, try_remaining)
-        screen.blit(image, (500, 120))
+        screen.blit(image, (480, 120))
+        screen.blit(false_letters, (100, 220))
+
+
 
         if "_" not in hangman_word.replace("",""):
-            screen.blit(win_condition, (70, 20))
-        elif try_remaining == 0:
-            screen.blit(lose_condition, (70, 20))
+            screen.blit(win_condition, (100, 20))
         
         if try_remaining == 5:
             image = pygame.image.load('images/pendu_2.png').convert()
@@ -161,6 +174,9 @@ while True:
             image = pygame.image.load('images/pendu_6.png').convert()
         elif try_remaining == 0:
             image = pygame.image.load('images/pendu_7.png').convert()
+            screen.blit(lose_condition, (100, 400))
+
+
 
 
     else:

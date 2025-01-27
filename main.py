@@ -1,6 +1,5 @@
 import pygame
 import sys
-import os 
 import random
 
 pygame.init()
@@ -12,7 +11,7 @@ grey = (200, 220, 220)
 black = (0, 0, 0)
 
 pygame.display.set_caption("Hangman")
-font = pygame.font.SysFont(None, 30)
+font = pygame.font.Font(None, 30)
 
 
 # Option buttons
@@ -49,6 +48,10 @@ def draw_main_page():
     screen.blit(quit_text, (quit_rect.x + 10, quit_rect.y + 30))
 
 
+#add more words
+user_text = ""
+
+
 #fonction second
 def words_option_page():
     screen.fill(grey)
@@ -57,9 +60,9 @@ def words_option_page():
     screen.blit(return_text, (return_rect.x + 20, return_rect.y + 30,))
 
 #add words
-add_words = open("words.txt", "a")
-
-
+#with open("words.txt", "a") as add_words:
+#    file.write(f"\n{}")
+#    word_added = font.render(f"Le mot {} à été ajouté")
 
 
 def draw_hangman_page(word_hangman, try_remaining):
@@ -71,20 +74,15 @@ def draw_hangman_page(word_hangman, try_remaining):
 
 
 
-image = pygame.image.load('images\pendu_1.png').convert()
 win_condition = font.render("You Win", False, black)
 lose_condition = font.render("You Lose", False, black)
 
-
-score = 0
 # Main loop
+score = 0
 main_page = True
 in_game = False
 found_letters = set()
-mot = ""
 try_remaining = 6
-victory = False
-add_words = False
 
 
 while True:
@@ -124,7 +122,9 @@ while True:
 
 
     if main_page:
+        image = pygame.image.load('images\pendu_1.png').convert()
         draw_main_page()
+
     elif in_game:
         hangman_word = convert_hangman(word, found_letters)
         draw_hangman_page(hangman_word, try_remaining)
@@ -145,9 +145,10 @@ while True:
 
         elif try_remaining == 0:
             screen.blit(lose_condition, (150, 20))
-            image = pygame.image.load('images\pendu_7.png').convert()
             score -= 20
+            image = pygame.image.load('images\pendu_7.png').convert()
             pygame.display.flip()
+
             pygame.time.delay(3000)
             main_page = True
             in_game = False
@@ -167,5 +168,19 @@ while True:
 
     else:
         words_option_page()
-    
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                user_text = user_text [0:-1]
+            else:
+                user_text += event.unicode
+
+
+    text_surface = font.render(user_text, True,(255, 255, 255))
+    screen.blit(text_surface,(100, 100))
     pygame.display.flip()
+
+#                if event.type == pygame.K_KP_ENTER:
+#                   with open("words.txt", "a") as add_words:
+#                    file.write(f"\n{user_text}")
+#                    word_added = font.render(f"Le mot {user_text} à été ajouté")

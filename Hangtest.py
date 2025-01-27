@@ -6,15 +6,20 @@ import random
 pygame.init()
 
 screen = pygame.display.set_mode((800, 600))
-font_path = os.path.join(r'C:\Users\nadjl\PressStart2P-Regular.ttf')
-size = 19
+font = pygame.font.SysFont("comicsansms", 20)
+sans_font = pygame.font.SysFont("comicsansms", 28)
+
 # Colors
 grey = (200, 220, 220)
 black = (0, 0, 0)
 
-pygame.display.set_caption("Pendu")
-
-font = pygame.font.SysFont("comicsansms", 20)
+# Game variables
+difficulty = "medium"
+current_page = "main"
+score = 0
+found_letters = set()
+try_remaining = 6
+word = ""
 
 
 # Option buttons
@@ -24,15 +29,20 @@ quit_rect = pygame.Rect(300,380,150,100)
 return_rect = pygame.Rect(300,470,150,100)
 add_word_rect = pygame.Rect(300,300,200,100)
 difficultie_rect = pygame.Rect(300,150,200,100)
+easy_rect = pygame.Rect(100, 200, 150, 50)
+medium_rect = pygame.Rect(300, 200, 150, 50)
+hard_rect = pygame.Rect(500, 200, 150, 50)
 
+# Images
+images = [pygame.image.load(f'pendu_{i}.png').convert() for i in range(1, 8)]
+
+# Word list
 with open("words.txt", "r") as file:
     word_list = [word.strip() for word in file.readlines()]
 
-def words_random(file):
-    with open (file,"r") as f:
-        words = f.read().splitlines()
-    return (random.choice(words))
-    
+def words_random():
+    return random.choice(word_list)
+
 def convert_hangman(word, found_letters):
     return " ".join([letter if letter in found_letters else "_" for letter in word])
  
@@ -42,26 +52,27 @@ def draw_main_page():
     pygame.draw.rect(screen, black, option_rect, 5)
     pygame.draw.rect(screen, black, play_rect, 5)
     pygame.draw.rect(screen, black, quit_rect, 5)
-    play_text = font.render("PLAY", True, black)
-    option_text = font.render("OPTION", True, black)
-    quit_text = font.render("QUIT",True, black)
-    screen.blit(option_text, (option_rect.x + 20, option_rect.y + 30))
-    screen.blit(play_text, (play_rect.x+ 20, play_rect.y + 40))
-    screen.blit(quit_text, (quit_rect.x + 10, quit_rect.y + 30))
+    screen.blit(font.render("PLAY", True, black), (play_rect.x + 20, play_rect.y + 40))
+    screen.blit(font.render("OPTION", True, black), (option_rect.x + 20, option_rect.y + 30))
+    screen.blit(font.render("QUIT", True, black), (quit_rect.x + 10, quit_rect.y + 30))
 
 #fonction second
 def draw_option_page():
     screen.fill(grey)
-    pygame.draw.rect(screen, black, add_word_rect, 5)
-    pygame.draw.rect(screen, black, difficultie_rect, 5)
     pygame.draw.rect(screen, black, return_rect, 5)
-    add_word_text = font.render("ADD WORDS", True, black)
-    dificultie_text = font.render("DIFFICULTY", True, black)
-    return_text = font.render("RETURN", True, black)
-    screen.blit(add_word_text, (add_word_rect.x + 10, add_word_rect.y+ 30))
-    screen.blit(dificultie_text, (difficultie_rect.x + 10, difficultie_rect.y + 30))
-    screen.blit(return_text, (return_rect.x + 20, return_rect.y + 30,))
+    pygame.draw.rect(screen, black, difficulty_rect, 5)
+    screen.blit(font.render("RETURN", True, black), (return_rect.x + 20, return_rect.y + 30))
+    screen.blit(font.render("DIFFICULTY", True, black), (difficulty_rect.x + 10, difficulty_rect.y + 30))
 
+def draw_difficulty_page():
+    screen.fill(grey)
+    pygame.draw.rect(screen, black, easy_rect, 5)
+    pygame.draw.rect(screen, black, medium_rect, 5)
+    pygame.draw.rect(screen, black, hard_rect, 5)
+    screen.blit(font.render("EASY", True, black), (easy_rect.x + 30, easy_rect.y + 10))
+    screen.blit(font.render("MEDIUM", True, black), (medium_rect.x + 10, medium_rect.y + 10))
+    screen.blit(font.render("HARD", True, black), (hard_rect.x + 30, hard_rect.y + 10))
+    
 def draw_hangman_page(word_hangman, try_remaining):
     screen.fill(grey)
     hangman_text = font.render(word_hangman, True, black)
@@ -69,14 +80,18 @@ def draw_hangman_page(word_hangman, try_remaining):
     try_text = font.render(f"Try remaining: {try_remaining}",True, black)
     screen.blit(try_text,(150,70))
 
+def handle_game_over(hangman_word):
+    global current_page, score
+    if "_" not in hangman_word:
+        screen.blit(sans_font.render("You Win", False, black), (70, 20))
+        score += 30
+    else:
+        screen.blit(sans_font.render("You Lose", False, black), (70, 20))
+        score -= 20
+    pygame.display.flip()
+    pygame.time.delay(3000)
+    current_page = "main"
 
-
-sans_font = pygame.font.SysFont("comicsansms", 28)
-image = pygame.image.load('pendu_1.png').convert()
-win_condition = sans_font.render("You Win", False, black)
-lose_condition = sans_font.render("You Lose", False, black)
-
-score = 0
 # Main loop
 main_page = True
 in_game = False
@@ -84,80 +99,72 @@ found_letters = set()
 mot = ""
 try_remaining = 6
 victory = False
+easy_rect, medium_rect, hard_rect = None, None, None
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if main_page:
+            if current_page == "main":
                 if option_rect.collidepoint(event.pos):
-                    main_page = False
+                    current_page = "options"
                 elif play_rect.collidepoint(event.pos):
-                    main_page = False
-                    in_game = True
-                    word = words_random("words.txt")
+                    current_page = "game"
+                    word = words_random()
                     found_letters = set()
                     try_remaining = 6
                     score = 0
+                    if difficulty == "easy":
+                        try_remaining = 8
+                    elif difficulty == "hard":
+                        try_remaining = 4
                 elif quit_rect.collidepoint(event.pos):
                     pygame.quit()
                     sys.exit()
-            else:
+
+            elif current_page == "options":
                 if return_rect.collidepoint(event.pos):
-                    main_page = True
-                    in_game = False
+                    current_page = "main"
+                elif difficulty_rect.collidepoint(event.pos):
+                    current_page = "difficulty"
 
-        if in_game and event.type == pygame.KEYDOWN:
-            letter = event.unicode.lower()
-            if letter in found_letters:
-                continue
-            found_letters.add(letter)
-            if letter not in word:
-                try_remaining -=1
-            else:
-                score += 10 
+            elif current_page == "difficulty":
+                if easy_rect.collidepoint(event.pos):
+                    difficulty = "easy"
+                    current_page = "options"
+                elif medium_rect.collidepoint(event.pos):
+                    difficulty = "medium"
+                    current_page = "options"
+                elif hard_rect.collidepoint(event.pos):
+                    difficulty = "hard"
+                    current_page = "options"
 
-    if main_page:
+        if event.type == pygame.KEYDOWN:
+            if current_page == "game":
+                letter = event.unicode.lower()
+                if letter in found_letters:
+                    continue
+                found_letters.add(letter)
+                if letter not in word:
+                    try_remaining -= 1
+
+    if current_page == "main":
         draw_main_page()
-    elif in_game:
+    elif current_page == "game":
         hangman_word = convert_hangman(word, found_letters)
         draw_hangman_page(hangman_word, try_remaining)
-        screen.blit(image, (500, 120))
+        screen.blit(images[6 - try_remaining], (500, 120))  
+        screen.blit(font.render(f"Score: {score}", True, black), (40, 400))
 
-        score_text = font.render(f"Score: {score}", True, black)
-        screen.blit(score_text,(40, 400))
+        if try_remaining == 0 or "_" not in hangman_word:
+            handle_game_over(hangman_word)
 
-        if "_" not in hangman_word.replace("",""):
-            screen.blit(win_condition, (70, 20))
-            score += 30
-            pygame.display.flip()
-            pygame.time.delay(3000)
-            main_page = True
-            in_game = False
-
-        elif try_remaining == 0:
-            screen.blit(lose_condition, (70, 20))
-            score -= 20
-            pygame.display.flip()
-            pygame.time.delay(3000)
-            main_page = True
-            in_game = False
-        
-        if try_remaining == 5:
-            image = pygame.image.load('pendu_2.png').convert()
-        elif try_remaining == 4:
-            image = pygame.image.load('pendu_3.png').convert()
-        elif try_remaining == 3:
-            image = pygame.image.load('pendu_4.png').convert()
-        elif try_remaining == 2:
-            image = pygame.image.load('pendu_5.png').convert()
-        elif try_remaining == 1:
-            image = pygame.image.load('pendu_6.png').convert()
-        elif try_remaining == 0:
-            image = pygame.image.load('pendu_7.png').convert()
-    else:
+    elif current_page == "options":
         draw_option_page()
-    
+    elif current_page == "difficulty":
+        draw_difficulty_page()
+
     pygame.display.flip()

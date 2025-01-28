@@ -22,3 +22,15 @@ while True:
 
     screen.blit(text_surface,(0, 0))
     pygame.display.flip()
+
+
+#add words
+#with open("words.txt", "a") as add_words:
+#    file.write(f"\n{}")
+#    word_added = font.render(f"Le mot {} à été ajouté")
+
+
+#                if event.type == pygame.K_KP_ENTER:
+#                   with open("words.txt", "a") as add_words:
+#                    file.write(f"\n{user_text}")
+#                    word_added = font.render(f"Le mot {user_text} à été ajouté")

@@ -10,10 +10,10 @@ screen = pygame.display.set_mode((800, 600))
 grey = (200, 220, 220)
 black = (0, 0, 0)
 
+# Fonts
 pygame.display.set_caption("Hangman")
 font = pygame.font.Font(None, 30)
 font2 = pygame.font.Font(None, 60)
-
 
 
 # Option buttons
@@ -24,6 +24,7 @@ return_rect = pygame.Rect(50,470,150,100)
 add_word_rect = pygame.Rect(300,300,200,100)
 
 
+# Read txt file
 with open("words.txt", "r") as file:
     word_list = [word.strip() for word in file.readlines()]
 
@@ -36,7 +37,7 @@ def convert_hangman(word, found_letters):
     return " ".join([letter if letter in found_letters else "_" for letter in word])
 
  
-#fonction principal
+# Main menu
 def draw_main_page():
     screen.fill(grey)
     pygame.draw.rect(screen, black, option_rect, 5)
@@ -50,11 +51,11 @@ def draw_main_page():
     screen.blit(quit_text, (quit_rect.x + 48, quit_rect.y + 40))
 
 
-#add more words
+# Add more words
 user_text = ""
 
 
-#fonction second
+# Add words menu
 def words_option_page():
     screen.fill(grey)
     pygame.draw.rect(screen, black, return_rect, 5,)
@@ -62,13 +63,7 @@ def words_option_page():
     screen.blit(return_text, (return_rect.x + 33, return_rect.y + 40,))
 
 
-
-#add words
-#with open("words.txt", "a") as add_words:
-#    file.write(f"\n{}")
-#    word_added = font.render(f"Le mot {} à été ajouté")
-
-
+# Try remaining
 def draw_hangman_page(word_hangman, try_remaining):
     screen.fill(grey)
     hangman_text = font.render(word_hangman, True, black)
@@ -77,9 +72,10 @@ def draw_hangman_page(word_hangman, try_remaining):
     screen.blit(try_text,(150,70))
 
 
-
+# Win / Lose
 win_condition = font2.render("You Win", False, black)
 lose_condition = font2.render("You Lose", False, black)
+
 
 # Main loop
 score = 0
@@ -89,6 +85,7 @@ found_letters = set()
 try_remaining = 6
 
 
+# Game loop
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -127,7 +124,6 @@ while True:
 
     if main_page:
         user_text = ""
-
         image = pygame.image.load('images/pendu_1.png').convert()
         draw_main_page()
 
@@ -137,7 +133,6 @@ while True:
         hangman_word = convert_hangman(word, found_letters)
         draw_hangman_page(hangman_word, try_remaining)
         screen.blit(image, (470, 120))
-
         score_text = font.render(f"Score: {score}", True, black)
         screen.blit(score_text,(40, 400))
 
@@ -184,8 +179,3 @@ while True:
     text_surface = font.render(user_text, True,(255, 255, 255))
     screen.blit(text_surface,(100, 100))
     pygame.display.flip()
-
-#                if event.type == pygame.K_KP_ENTER:
-#                   with open("words.txt", "a") as add_words:
-#                    file.write(f"\n{user_text}")
-#                    word_added = font.render(f"Le mot {user_text} à été ajouté")

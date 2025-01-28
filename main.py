@@ -126,12 +126,14 @@ while True:
 
 
     if main_page:
-        image = pygame.image.load('images\pendu_1.png').convert()
+        user_text = ""
+
+        image = pygame.image.load('images/pendu_1.png').convert()
         draw_main_page()
 
     elif in_game:
         if try_remaining == 0:
-            image = pygame.image.load('images\pendu_7.png').convert()
+            image = pygame.image.load('images/pendu_7.png').convert()
         hangman_word = convert_hangman(word, found_letters)
         draw_hangman_page(hangman_word, try_remaining)
         screen.blit(image, (470, 120))

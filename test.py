@@ -29,6 +29,7 @@ while True:
 #    word_added = font.render(f"Le mot {} à été ajouté")
 
 
+ 
 #                if event.type == pygame.K_KP_ENTER:
 #                   with open("words.txt", "a") as add_words:
 #                    file.write(f"\n{user_text}")

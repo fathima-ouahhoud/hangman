@@ -169,14 +169,14 @@ while True:
 
 
     else:
-        words_option_page()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_BACKSPACE:
                 user_text = user_text [0:-1]
             else:
                 user_text += event.unicode
+        words_option_page()
 
 
-    text_surface = font.render(user_text, True,(255, 255, 255))
-    screen.blit(text_surface,(100, 100))
+        text_surface = font.render(user_text, True,(2, 2, 2))
+        screen.blit(text_surface,(100, 100))
     pygame.display.flip()
